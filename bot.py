@@ -12,7 +12,9 @@ def home():
     return "Bot is running!"
 
 def run_web():
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+    # ரெண்டர் வழங்கும் போர்ட்டை எடுக்கிறது
+    port = int(os.environ.get('PORT', 10000))
+    app.run(host='0.0.0.0', port=port)
 
 API_KEY = "AIzaSyAz51581sbr0pX9Q5uQwdTnNMA80"
 REFRESH_TOKEN = "AMf-vByw8FAmxA_6KlZW4QaAk95y2eAlwQctqs6Xm17WLhbBH18CG-pn8pSGIWytVm--_SxTByiHjfISm_t5EX4ruRO-YyJ2uUYTiAHrUXgvVftoO_RneW8SGignHtpxJPAWqg02GZ1EA3el6wGuyDDQRS3AJd0QYc9FyVyoEW8ok3raFEG7Zf1nSo7DKrtWhFqcxPaIILPsja1jZfqLPIB4QV3my1VXy-eN6SlO1XvBpyLDbAa9HaebR4ZE4YMP-471Gy02G9cqaIzjDEe65hobYXdn1ip5gLslVPtuxujbBub1ud4T7_mmmtDBTNeJykQq-BfDGM6pXAo_n7vXfqGicUKoDVe5wP4R3MwE8qB3HdCSUtRS9-jU6XsAtaZBLy8dqXz4VuHvFJYptOmA7Kxt-G-h7jliRLo9mwh_pVLvTGAdNJPvLf8"
@@ -39,7 +41,6 @@ def start_bot_socket():
     @sio.event
     def connect():
         print("Connected to Groic Socket server successfully!")
-        # ரூமில் இணைவதற்கான கோரிக்கை
         sio.emit('joinRoom', {'roomId': ROOM_ID})
 
     @sio.event
@@ -56,7 +57,6 @@ def start_bot_socket():
                     "x-app-version": "web",
                     "x-device-type": "web"
                 }
-                # சோர்ஸ் கோடில் கண்டறிந்தவாறு இணைப்பை ஏற்படுத்துதல்
                 sio.connect('https://groic.in', headers=headers, transports=['websocket'])
                 sio.wait()
             except Exception as e:
@@ -65,6 +65,10 @@ def start_bot_socket():
         time.sleep(30)
 
 if __name__ == "__main__":
-    t = Thread(target=run_web)
-    t.start()
+    # Flask-ஐ தனி த்ரெட்டில் இயக்குதல்
+    web_thread = Thread(target=run_web)
+    web_thread.daemon = True
+    web_thread.start()
+
+    # பாட் லாஜிக்கை பிரதானமாக இயக்குதல்
     start_bot_socket()
