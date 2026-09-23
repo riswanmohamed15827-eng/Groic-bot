@@ -26,35 +26,35 @@ def refresh_firebase_token():
         "refresh_token": REFRESH_TOKEN
     }
     try:
-        print("Attempting to refresh Firebase token...")
+        print("Attempting to refresh Firebase token...", flush=True)
         response = requests.post(url, data=data)
-        print(f"Token API Response Code: {response.status_code}")
+        print(f"Token API Response Code: {response.status_code}", flush=True)
         if response.status_code == 200:
             token_data = response.json()
             return token_data.get("id_token")
         else:
-            print(f"Token Error Body: {response.text}")
+            print(f"Token Error Body: {response.text}", flush=True)
     except Exception as e:
-        print(f"Token Exception: {e}")
+        print(f"Token Exception: {e}", flush=True)
     return None
 
 def start_bot_socket():
-    print("Bot socket initialization started...")
+    print("Bot socket initialization started...", flush=True)
     sio = socketio.Client()
 
     @sio.event
     def connect():
-        print("Connected to Groic Socket server successfully!")
+        print("Connected to Groic Socket server successfully!", flush=True)
         sio.emit('joinRoom', {'roomId': ROOM_ID})
 
     @sio.event
     def disconnect():
-        print("Disconnected from Groic server.")
+        print("Disconnected from Groic server.", flush=True)
 
     while True:
         id_token = refresh_firebase_token()
         if id_token:
-            print("Firebase Token got successfully, connecting to socket...")
+            print("Firebase Token got successfully, connecting to socket...", flush=True)
             try:
                 headers = {
                     "Authorization": id_token,
@@ -64,9 +64,9 @@ def start_bot_socket():
                 sio.connect('https://groic.in', headers=headers, transports=['websocket'])
                 sio.wait()
             except Exception as e:
-                print(f"Socket connection error: {e}")
+                print(f"Socket connection error: {e}", flush=True)
         else:
-            print("Failed to get ID token, retrying in 30 seconds...")
+            print("Failed to get ID token, retrying in 30 seconds...", flush=True)
         
         time.sleep(30)
 
@@ -76,4 +76,3 @@ if __name__ == "__main__":
     web_thread.start()
 
     start_bot_socket()
-    
