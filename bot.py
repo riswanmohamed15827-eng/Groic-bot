@@ -3,6 +3,7 @@ import time
 import requests
 from threading import Thread
 from flask import Flask
+import socketio
 
 app = Flask('')
 
@@ -28,23 +29,42 @@ def refresh_firebase_token():
         if response.status_code == 200:
             token_data = response.json()
             return token_data.get("id_token")
-        else:
-            print(f"Token Refresh Error: {response.text}")
     except Exception as e:
-        print(f"Exception during token refresh: {e}")
+        print(f"Token Error: {e}")
     return None
 
-def bot_loop():
-    print(f"Groic bot started for Room ID: {ROOM_ID}")
+def start_bot_socket():
+    sio = socketio.Client()
+
+    @sio.event
+    def connect():
+        print("Connected to Groic Socket server successfully!")
+        # ரூமில் இணைவதற்கான கோரிக்கை
+        sio.emit('joinRoom', {'roomId': ROOM_ID})
+
+    @sio.event
+    def disconnect():
+        print("Disconnected from Groic server.")
+
     while True:
         id_token = refresh_firebase_token()
         if id_token:
-            print("Successfully authenticated with Firebase and got ID Token!")
-        else:
-            print("Authentication failed, retrying in next cycle...")
+            print("Firebase Token refreshed, connecting to socket...")
+            try:
+                headers = {
+                    "Authorization": id_token,
+                    "x-app-version": "web",
+                    "x-device-type": "web"
+                }
+                # சோர்ஸ் கோடில் கண்டறிந்தவாறு இணைப்பை ஏற்படுத்துதல்
+                sio.connect('https://groic.in', headers=headers, transports=['websocket'])
+                sio.wait()
+            except Exception as e:
+                print(f"Socket connection error: {e}")
+        
         time.sleep(30)
 
 if __name__ == "__main__":
     t = Thread(target=run_web)
     t.start()
-    bot_loop()
+    start_bot_socket()
