@@ -12,7 +12,6 @@ def home():
     return "Bot is running!"
 
 def run_web():
-    # ரெண்டர் வழங்கும் போர்ட்டை எடுக்கிறது
     port = int(os.environ.get('PORT', 10000))
     app.run(host='0.0.0.0', port=port)
 
@@ -27,15 +26,20 @@ def refresh_firebase_token():
         "refresh_token": REFRESH_TOKEN
     }
     try:
+        print("Attempting to refresh Firebase token...")
         response = requests.post(url, data=data)
+        print(f"Token API Response Code: {response.status_code}")
         if response.status_code == 200:
             token_data = response.json()
             return token_data.get("id_token")
+        else:
+            print(f"Token Error Body: {response.text}")
     except Exception as e:
-        print(f"Token Error: {e}")
+        print(f"Token Exception: {e}")
     return None
 
 def start_bot_socket():
+    print("Bot socket initialization started...")
     sio = socketio.Client()
 
     @sio.event
@@ -50,7 +54,7 @@ def start_bot_socket():
     while True:
         id_token = refresh_firebase_token()
         if id_token:
-            print("Firebase Token refreshed, connecting to socket...")
+            print("Firebase Token got successfully, connecting to socket...")
             try:
                 headers = {
                     "Authorization": id_token,
@@ -61,14 +65,15 @@ def start_bot_socket():
                 sio.wait()
             except Exception as e:
                 print(f"Socket connection error: {e}")
+        else:
+            print("Failed to get ID token, retrying in 30 seconds...")
         
         time.sleep(30)
 
 if __name__ == "__main__":
-    # Flask-ஐ தனி த்ரெட்டில் இயக்குதல்
     web_thread = Thread(target=run_web)
     web_thread.daemon = True
     web_thread.start()
 
-    # பாட் லாஜிக்கை பிரதானமாக இயக்குதல்
     start_bot_socket()
+    
