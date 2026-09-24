@@ -14,7 +14,7 @@ def run_web():
     port = int(os.environ.get('PORT', 10000))
     app.run(host='0.0.0.0', port=port)
 
-# Konsoldan ve gönderdiğiniz kısımdan birleştirilen eksiksiz ID Token
+# கன்சோலில் இருந்து பெறப்பட்ட முழுமையான நேரடி ID Token (டிரான்ஸ்மிஷன் பிழையைத் தவிர்க்க முழுசாக paste செய்யவும்)
 ID_TOKEN = "eyJhbGciOiJSUzI1NiIsImtpZCI6ImI1MTImMTNpZHRwZCI2ImVpZiZpcCIsImFsZyI6IlJTMjU2In0.eyJhdWQiOiJmcmlyZktleSIsInVzZXJfaWQiOiJFeHBvcnRlZFRva2VuTGF3MzZhMzM0YzYi"
 ROOM_ID = "37uqc814uu"
 
