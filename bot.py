@@ -20,7 +20,8 @@ ROOM_ID = "37uqc814uu"
 
 def start_bot_socket():
     print("Bot socket initialization started...", flush=True)
-    sio = socketio.Client()
+    # லாக்ஸில் முழு விவரம் தெரிய லாக்கரை ஆன் செய்துள்ளோம்
+    sio = socketio.Client(logger=True, engineio_logger=True)
 
     @sio.event
     def connect():
@@ -33,13 +34,13 @@ def start_bot_socket():
 
     while True:
         if ID_TOKEN:
-            print("Connecting to socket with auth token...", flush=True)
+            print("Connecting to socket with proper handshake...", flush=True)
             try:
-                # Socket.IO auth முறையைப் பயன்படுத்துதல்
+                # டிரான்ஸ்போர்ட் கட்டுப்பாட்டை நீக்கிவிட்டு, Header மற்றும் Auth இரண்டையும் அனுப்புகிறோம்
                 sio.connect(
                     'https://groic.in', 
-                    auth={"token": ID_TOKEN}, 
-                    transports=['websocket']
+                    headers={"Authorization": ID_TOKEN},
+                    auth={"token": ID_TOKEN}
                 )
                 sio.wait()
             except Exception as e:
