@@ -14,7 +14,7 @@ def run_web():
     port = int(os.environ.get('PORT', 10000))
     app.run(host='0.0.0.0', port=port)
 
-# கன்சோலில் இருந்து பெறப்பட்ட முழுமையான நேரடி ID Token (டிரான்ஸ்மிஷன் பிழையைத் தவிர்க்க முழுசாக paste செய்யவும்)
+# கன்சோலில் இருந்து பெறப்பட்ட முழுமையான நேரடி ID Token
 ID_TOKEN = "eyJhbGciOiJSUzI1NiIsImtpZCI6ImI1MTImMTNpZHRwZCI2ImVpZiZpcCIsImFsZyI6IlJTMjU2In0.eyJhdWQiOiJmcmlyZktleSIsInVzZXJfaWQiOiJFeHBvcnRlZFRva2VuTGF3MzZhMzM0YzYi"
 ROOM_ID = "37uqc814uu"
 
@@ -33,14 +33,14 @@ def start_bot_socket():
 
     while True:
         if ID_TOKEN:
-            print("Connecting to socket with direct token...", flush=True)
+            print("Connecting to socket with auth token...", flush=True)
             try:
-                headers = {
-                    "Authorization": ID_TOKEN,
-                    "x-app-version": "web",
-                    "x-device-type": "web"
-                }
-                sio.connect('https://groic.in', headers=headers, transports=['websocket'])
+                # Socket.IO auth முறையைப் பயன்படுத்துதல்
+                sio.connect(
+                    'https://groic.in', 
+                    auth={"token": ID_TOKEN}, 
+                    transports=['websocket']
+                )
                 sio.wait()
             except Exception as e:
                 print(f"Socket connection error: {e}", flush=True)
